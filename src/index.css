@@ -165,7 +165,6 @@
   @apply rounded-md bg-red-500/10 p-2 text-xs text-red-400;
 }
 
-/* Chrome, Edge, Safari */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -175,7 +174,7 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #2a3942; /* matches your border color */
+  background-color: #2a3942;
   border-radius: 999px;
 }
 
