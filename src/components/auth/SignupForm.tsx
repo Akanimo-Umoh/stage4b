@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext"
 import { RegisterFormSchema } from "@/validation/rules"
 import { isAxiosError } from "axios"
+import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import z from "zod"
@@ -9,6 +10,9 @@ export default function SignupForm() {
   const [username, setUsername] = useState("")
   const [displayName, setDisplayName] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
+
   const [usernameError, setUsernameError] = useState<string | null>(null)
   const [displayNameError, setDisplayNameError] = useState<string | null>(null)
   const [passwordErrors, setPasswordErrors] = useState<string[] | null>(null)
@@ -18,16 +22,40 @@ export default function SignupForm() {
   const { signup } = useAuth()
   const navigate = useNavigate()
 
-  async function handleSubmit(e: React.SubmitEvent) {
-    e.preventDefault()
+  function handlePasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value
+    setPassword(value)
 
-    // reset errors
+    if (!hasSubmitted) return
+
+    const result = RegisterFormSchema.pick({ password: true }).safeParse({
+      password: value,
+    })
+
+    if (!result.success) {
+      const { fieldErrors } = z.flattenError(result.error)
+      if (fieldErrors.password) {
+        const raw = fieldErrors.password[0]
+        try {
+          setPasswordErrors(JSON.parse(raw))
+        } catch {
+          setPasswordErrors([raw])
+        }
+      }
+    } else {
+      setPasswordErrors(null)
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setHasSubmitted(true)
+
     setUsernameError(null)
     setDisplayNameError(null)
     setPasswordErrors(null)
     setServerError(null)
 
-    // client-side validation
     const result = RegisterFormSchema.safeParse({
       username,
       display_name: displayName,
@@ -40,6 +68,7 @@ export default function SignupForm() {
       if (fieldErrors.username) setUsernameError(fieldErrors.username[0])
       if (fieldErrors.display_name)
         setDisplayNameError(fieldErrors.display_name[0])
+
       if (fieldErrors.password) {
         const raw = fieldErrors.password[0]
         try {
@@ -75,102 +104,82 @@ export default function SignupForm() {
   }
 
   return (
-    <div className="container mx-6 w-full max-w-100 md:max-w-1/2">
-      <h1 className="title">Sign up</h1>
+    <div className="auth-card">
+      <h1 className="auth-title">Create Account</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {serverError && (
-          <p role="alert" className="error">
-            {serverError}
-          </p>
-        )}
+        {serverError && <p className="auth-error">{serverError}</p>}
 
         <div>
-          <label htmlFor="signup-username">Username</label>
-
+          <label className="auth-label">Username</label>
           <input
-            type="text"
-            id="signup-username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="input"
-            aria-describedby={usernameError ? "username-error" : undefined}
+            onChange={(e) => {
+              setUsername(e.target.value)
+              if (usernameError) setUsernameError(null)
+            }}
+            className="auth-input"
           />
-
           {usernameError && (
-            <p
-              id="username-error"
-              role="alert"
-              className="text-[12px] text-state-error"
-            >
-              {usernameError}
-            </p>
+            <p className="text-xs text-red-400">{usernameError}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="signup-displayName">Display Name</label>
-
+          <label className="auth-label">Display Name</label>
           <input
-            type="text"
-            id="signup-displayName"
             value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            className="input"
-            aria-describedby={
-              displayNameError ? "displayname-error" : undefined
-            }
+            onChange={(e) => {
+              setDisplayName(e.target.value)
+              if (displayNameError) setDisplayNameError(null)
+            }}
+            className="auth-input"
           />
-
           {displayNameError && (
-            <p
-              id="displayname-error"
-              role="alert"
-              className="text-[12px] text-state-error"
-            >
-              {displayNameError}
-            </p>
+            <p className="text-xs text-red-400">{displayNameError}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="signup-password">Password</label>
-          <input
-            type="password"
-            id="signup-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="input"
-            aria-describedby={passwordErrors ? "password-error" : undefined}
-          />
+          <label className="auth-label">Password</label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={handlePasswordChange}
+              className="auth-input"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              className="absolute inset-y-0 right-3 flex cursor-pointer items-center text-[#8696A0]"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
 
           {passwordErrors && (
-            <div className="text-[12px]" id="password-error" role="alert">
-              <p className="text-state-error">Password must:</p>
-              <ul className="ml-4 list-inside list-disc space-y-1">
-                {passwordErrors.map((err: string) => (
-                  <li key={err} className="text-state-error">
-                    {err}
-                  </li>
+            <div className="text-xs">
+              <p className="text-red-400">Password must:</p>
+              <ul className="ml-4 list-disc text-red-400">
+                {passwordErrors.map((err) => (
+                  <li key={err}>{err}</li>
                 ))}
               </ul>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col items-center justify-center gap-2">
-          <button
-            type="submit"
-            className="btn-primary w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? "Creating account..." : "Sign up"}
-          </button>
+        <button type="submit" disabled={isLoading} className="auth-btn">
+          {isLoading ? "Creating account..." : "Sign up"}
+        </button>
 
-          <Link to="/login" className="text-link">
-            or login here
+        <p className="text-center text-xs text-[#8696A0]">
+          Already have an account?{" "}
+          <Link to="/login" className="auth-link">
+            Login
           </Link>
-        </div>
+        </p>
       </form>
     </div>
   )

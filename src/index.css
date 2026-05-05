@@ -133,30 +133,34 @@
   }
 }
 
-.input {
-  @apply block w-full rounded-md border-0 bg-white p-2 text-slate-900 shadow-sm ring-1 ring-slate-300 ring-inset placeholder:text-slate-500 focus:ring-1 focus:ring-indigo-600 focus:ring-inset;
+.auth-page {
+  @apply flex min-h-screen w-full items-center justify-center bg-[#111B21] px-4;
 }
 
-label {
-  @apply block text-sm leading-6 font-medium text-slate-500;
+.auth-card {
+  @apply w-full max-w-md rounded-2xl border border-[#2A3942] bg-[#202C33] p-6 shadow-xl;
 }
 
-.container {
-  @apply rounded-xl bg-white p-6 shadow-lg;
+.auth-title {
+  @apply mb-6 text-center text-xl font-semibold text-[#E9EDEF];
 }
 
-.btn-primary {
-  @apply cursor-pointer rounded-md bg-indigo-600 py-1.5 text-white shadow-sm ring-indigo-700 ring-offset-1 hover:bg-indigo-700 active:ring-2 disabled:opacity-50;
+.auth-label {
+  @apply block text-xs text-[#8696A0];
 }
 
-.text-link {
-  @apply text-sm text-indigo-600 underline hover:text-indigo-700;
+.auth-input {
+  @apply mt-1 w-full rounded-lg bg-[#111B21] px-3 py-2 text-sm text-[#E9EDEF] ring-1 ring-[#2A3942] outline-none focus:ring-[#00A884];
 }
 
-.title {
-  @apply mb-6 text-center text-3xl leading-9 font-bold text-slate-900;
+.auth-btn {
+  @apply w-full cursor-pointer rounded-lg bg-[#00A884] py-2 text-sm font-medium text-white transition hover:bg-[#06c796] disabled:opacity-50;
 }
 
-.error {
-  @apply mt-1 text-xs text-red-500;
+.auth-link {
+  @apply text-sm text-[#00A884] hover:underline;
+}
+
+.auth-error {
+  @apply rounded-md bg-red-500/10 p-2 text-xs text-red-400;
 }

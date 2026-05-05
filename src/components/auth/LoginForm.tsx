@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext"
 import { LoginFormSchema } from "@/validation/rules"
 import { isAxiosError } from "axios"
+import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import z from "zod"
@@ -8,6 +9,9 @@ import z from "zod"
 export default function LoginForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
+
   const [usernameError, setUsernameError] = useState<string | null>(null)
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [serverError, setServerError] = useState<string | null>(null)
@@ -16,8 +20,19 @@ export default function LoginForm() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  async function handleSubmit(e: React.SubmitEvent) {
+  function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setUsername(e.target.value)
+    if (hasSubmitted && usernameError) setUsernameError(null)
+  }
+
+  function handlePasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setPassword(e.target.value)
+    if (hasSubmitted && passwordError) setPasswordError(null)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setHasSubmitted(true)
 
     setUsernameError(null)
     setPasswordError(null)
@@ -30,7 +45,6 @@ export default function LoginForm() {
 
     if (!result.success) {
       const { fieldErrors } = z.flattenError(result.error)
-      // const fields = result.error.flatten().fieldErrors
       if (fieldErrors.username) setUsernameError(fieldErrors.username[0])
       if (fieldErrors.password) setPasswordError(fieldErrors.password[0])
       return
@@ -43,12 +57,11 @@ export default function LoginForm() {
       navigate("/chat")
     } catch (err) {
       if (isAxiosError(err)) {
-        const status = err.response?.status
-        if (status === 401) {
-          setServerError("Invalid username or password.")
-        } else {
-          setServerError("Something went wrong. Please try again.")
-        }
+        setServerError(
+          err.response?.status === 401
+            ? "Invalid username or password."
+            : "Something went wrong. Please try again."
+        )
       } else {
         setServerError("Something went wrong. Please try again.")
       }
@@ -58,75 +71,56 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="container mx-6 w-full max-w-100 border md:max-w-1/2">
-      <h1 className="title">Login</h1>
+    <div className="auth-card">
+      <h1 className="auth-title">Welcome Back</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {serverError && (
-          <p role="alert" className="error">
-            {serverError}
-          </p>
-        )}
+        {serverError && <p className="auth-error">{serverError}</p>}
 
         <div>
-          <label htmlFor="login-username">Username</label>
+          <label className="auth-label">Username</label>
           <input
-            type="text"
-            id="login-username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="input"
-            aria-describedby={usernameError ? "username-error" : undefined}
+            onChange={handleUsernameChange}
+            className="auth-input"
           />
-
           {usernameError && (
-            <p
-              id="username-error"
-              role="alert"
-              className="text-[12px] text-state-error"
-            >
-              {usernameError}
-            </p>
+            <p className="text-xs text-red-400">{usernameError}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="login-password">Password</label>
-
-          <input
-            type="password"
-            id="login-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="input"
-            aria-describedby={passwordError ? "password-error" : undefined}
-          />
-
-          {passwordError && (
-            <p
-              id="password-error"
-              role="alert"
-              className="text-[12px] text-state-error"
+          <label className="auth-label">Password</label>
+          <div className="relative mt-1">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={handlePasswordChange}
+              className="auth-input pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              className="absolute inset-y-0 right-3 flex cursor-pointer items-center text-[#8696A0]"
             >
-              {passwordError}
-            </p>
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+          {passwordError && (
+            <p className="text-xs text-red-400">{passwordError}</p>
           )}
         </div>
 
-        <div className="flex flex-col items-center justify-center gap-2">
-          <button
-            type="submit"
-            data-testid="auth-login-submit"
-            className="btn-primary w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? "Logging in..." : "Login"}
-          </button>
+        <button type="submit" disabled={isLoading} className="auth-btn">
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
 
-          <Link to="/signup" className="text-link">
-            or sign up here
+        <p className="text-center text-xs text-[#8696A0]">
+          Don't have an account?{" "}
+          <Link to="/signup" className="auth-link">
+            Sign up
           </Link>
-        </div>
+        </p>
       </form>
     </div>
   )
