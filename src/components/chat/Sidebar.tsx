@@ -60,6 +60,18 @@ export function Sidebar({
     return () => document.removeEventListener("mousedown", handler)
   }, [])
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowDropdown(false)
+        // setQuery("")
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [])
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     setQuery(val)
@@ -125,7 +137,7 @@ export function Sidebar({
           />
 
           {showDropdown && searchResults.length > 0 && (
-            <div className="absolute top-full right-0 left-0 z-10 mt-1 overflow-hidden rounded-lg border border-[#2A3942] bg-[#202C33] shadow-xl">
+            <div className="custom-scrollbar absolute top-full right-0 left-0 z-10 mt-1 max-h-64 overflow-y-auto rounded-lg border border-[#2A3942] bg-[#202C33] shadow-xl">
               {searchResults.map((u) => (
                 <button
                   key={u.id}
