@@ -161,7 +161,3 @@ Full docs: `https://whisperbox.koyeb.app/docs`
 [Live Url](https://stage4b.vercel.app/)
 
 ---
-
-## Author
-
-Built by [Your Name] for Frontend Wizards Stage 4B.
