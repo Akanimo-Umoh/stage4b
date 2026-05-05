@@ -31,7 +31,8 @@ export const useChat = () => {
   const { user } = useAuth()
 
   const [conversations, setConversations] = useState<ConversationSummary[]>([])
-  const [activeConversation, setActiveConversation] = useState<ConversationSummary | null>(null)
+  const [activeConversation, setActiveConversation] =
+    useState<ConversationSummary | null>(null)
   const [messages, setMessages] = useState<DecryptedMessage[]>([])
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([])
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
@@ -43,15 +44,18 @@ export const useChat = () => {
 
   // ── helpers ───────────────────────────────────────────────────────────────
 
-  const getOrFetchRecipientKey = useCallback(async (userId: string): Promise<CryptoKey> => {
-    if (publicKeyCache.current.has(userId)) {
-      return publicKeyCache.current.get(userId)!
-    }
-    const base64 = await getRecipientPublicKey(userId)
-    const key = await importRecipientPublicKey(base64)
-    publicKeyCache.current.set(userId, key)
-    return key
-  }, [])
+  const getOrFetchRecipientKey = useCallback(
+    async (userId: string): Promise<CryptoKey> => {
+      if (publicKeyCache.current.has(userId)) {
+        return publicKeyCache.current.get(userId)!
+      }
+      const base64 = await getRecipientPublicKey(userId)
+      const key = await importRecipientPublicKey(base64)
+      publicKeyCache.current.set(userId, key)
+      return key
+    },
+    []
+  )
 
   const decryptOne = useCallback(
     async (msg: Message): Promise<DecryptedMessage> => {
@@ -155,6 +159,7 @@ export const useChat = () => {
   const selectConversation = useCallback(
     (conversation: ConversationSummary | null) => {
       setActiveConversation(conversation)
+      setError(null)
       if (conversation) {
         loadMessages(conversation.user_id)
       } else {
@@ -211,7 +216,9 @@ export const useChat = () => {
       setError(null)
 
       try {
-        const recipientKey = await getOrFetchRecipientKey(activeConversation.user_id)
+        const recipientKey = await getOrFetchRecipientKey(
+          activeConversation.user_id
+        )
         const senderKey = await getPublicKey(user.id)
         if (!senderKey) throw new Error("Sender public key not found")
 
@@ -237,7 +244,13 @@ export const useChat = () => {
         setIsSending(false)
       }
     },
-    [activeConversation, user, getOrFetchRecipientKey, wsSend, refreshConversations]
+    [
+      activeConversation,
+      user,
+      getOrFetchRecipientKey,
+      wsSend,
+      refreshConversations,
+    ]
   )
 
   // ── user search ───────────────────────────────────────────────────────────
