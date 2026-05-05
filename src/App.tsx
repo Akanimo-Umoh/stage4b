@@ -1,5 +1,9 @@
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
-import { HomePage } from "./pages/home"
+import {
+  Navigate,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from "react-router-dom"
 import { Login } from "./pages/login"
 import { Signup } from "./pages/signup"
 import { PublicRoute } from "./routes/PublicRoute"
@@ -11,16 +15,16 @@ export function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Chat />} />
+        </Route>
 
         <Route element={<PublicRoute />}>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
         </Route>
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/chat" element={<Chat />} />
-        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   )
