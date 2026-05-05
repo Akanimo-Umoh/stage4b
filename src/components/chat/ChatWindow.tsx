@@ -140,7 +140,7 @@ export function ChatWindow({
       )}
 
       {/* message list */}
-      <div className="flex-1 space-y-1 overflow-y-auto px-3 py-4 sm:px-4">
+      <div className="custom-scrollbar flex-1 space-y-1 overflow-y-auto px-3 py-4 sm:px-4">
         {isLoadingMessages ? (
           <div className="space-y-3">
             {[...Array(6)].map((_, i) => (

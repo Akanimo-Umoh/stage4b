@@ -181,7 +181,7 @@ export function Sidebar({
       </div>
 
       {/* conversation list */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="custom-scrollbar flex-1 overflow-y-auto">
         {isLoadingConversations ? (
           <div className="space-y-0">
             {[...Array(6)].map((_, i) => (
