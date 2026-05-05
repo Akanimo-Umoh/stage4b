@@ -88,7 +88,7 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
       }
 
       ws.onerror = () => {
-        optionsRef.current.onError?.("WebSocket connection error")
+        // optionsRef.current.onError?.("WebSocket connection error")
       }
     }
   }, [])
