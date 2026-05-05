@@ -1,70 +1,121 @@
+import { useAuth } from "@/context/AuthContext"
+import { LoginFormSchema } from "@/validation/rules"
+import { isAxiosError } from "axios"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
+  const [usernameError, setUsernameError] = useState<string | null>(null)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const { login } = useAuth()
   const navigate = useNavigate()
 
-  function handleSubmit(e: React.SubmitEvent) {
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault()
-    setError(null)
 
-    // const result = logIn(email, password)
+    setUsernameError(null)
+    setPasswordError(null)
+    setServerError(null)
 
-    // if (!result.success) {
-    //   setError(result.error)
-    //   return
-    // }
+    const result = LoginFormSchema.safeParse({ username, password })
 
-    navigate("/dashboard")
+    if (!result.success) {
+      const fields = result.error.flatten().fieldErrors
+      if (fields.username) setUsernameError(fields.username[0])
+      if (fields.password) setPasswordError(fields.password[0])
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      await login(username, password)
+      navigate("/chat")
+    } catch (err) {
+      if (isAxiosError(err)) {
+        const status = err.response?.status
+        if (status === 401) {
+          setServerError("Invalid username or password.")
+        } else {
+          setServerError("Something went wrong. Please try again.")
+        }
+      } else {
+        setServerError("Something went wrong. Please try again.")
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
-    <div className="container mx-6 w-full max-w-100 md:max-w-1/2 border">
+    <div className="container mx-6 w-full max-w-100 border md:max-w-1/2">
       <h1 className="title">Login</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
+        {serverError && (
           <p role="alert" className="error">
-            {error}
+            {serverError}
           </p>
         )}
 
         <div>
-          <label htmlFor="login-email">Email</label>
+          <label htmlFor="login-username">Username</label>
           <input
-            type="email"
-            id="login-email"
-            data-testid="auth-login-email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="bg-white input"
+            type="text"
+            id="login-username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="input"
+            aria-describedby={usernameError ? "username-error" : undefined}
           />
+
+          {usernameError && (
+            <p
+              id="username-error"
+              role="alert"
+              className="text-[12px] text-state-error"
+            >
+              {usernameError}
+            </p>
+          )}
         </div>
 
         <div>
           <label htmlFor="login-password">Password</label>
+
           <input
             type="password"
             id="login-password"
-            data-testid="auth-login-password"
-            required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-white input"
+            className="input"
+            aria-describedby={passwordError ? "password-error" : undefined}
           />
+
+          {passwordError && (
+            <p
+              id="password-error"
+              role="alert"
+              className="text-[12px] text-state-error"
+            >
+              {passwordError}
+            </p>
+          )}
         </div>
 
-        <div className="flex items-end gap-4">
+        <div className="flex flex-col items-center justify-center gap-2">
           <button
             type="submit"
             data-testid="auth-login-submit"
-            className="btn-primary"
+            className="btn-primary w-full"
+            disabled={isLoading}
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
 
           <Link to="/signup" className="text-link">
