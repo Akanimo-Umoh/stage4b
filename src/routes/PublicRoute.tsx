@@ -6,5 +6,5 @@ export function PublicRoute() {
 
   if (isLoading) return <div>Loading...</div>
 
-  return !isAuthenticated ? <Outlet /> : <Navigate to="/chat" replace />
+  return !isAuthenticated ? <Outlet /> : <Navigate to="/" replace />
 }
