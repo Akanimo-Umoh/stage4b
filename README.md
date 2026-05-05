@@ -94,14 +94,14 @@ plaintext  ◄── never left your device
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
+- pnpm (recommended)
 
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/whisperbox.git
+git clone https://github.com/Akanimo-Umoh/stage4b.git
 cd whisperbox
-npm install
+pnpm install
 ```
 
 ### Environment Variables
@@ -115,13 +115,13 @@ VITE_API_BASE_URL=https://whisperbox.koyeb.app
 ### Run Development Server
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 ### Build for Production
 
 ```bash
-npm run build
+pnpm build
 ```
 
 ---
