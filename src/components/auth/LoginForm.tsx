@@ -3,6 +3,7 @@ import { LoginFormSchema } from "@/validation/rules"
 import { isAxiosError } from "axios"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import z from "zod"
 
 export default function LoginForm() {
   const [username, setUsername] = useState("")
@@ -22,19 +23,23 @@ export default function LoginForm() {
     setPasswordError(null)
     setServerError(null)
 
-    const result = LoginFormSchema.safeParse({ username, password })
+    const result = LoginFormSchema.safeParse({
+      username: username.toLowerCase(),
+      password,
+    })
 
     if (!result.success) {
-      const fields = result.error.flatten().fieldErrors
-      if (fields.username) setUsernameError(fields.username[0])
-      if (fields.password) setPasswordError(fields.password[0])
+      const { fieldErrors } = z.flattenError(result.error)
+      // const fields = result.error.flatten().fieldErrors
+      if (fieldErrors.username) setUsernameError(fieldErrors.username[0])
+      if (fieldErrors.password) setPasswordError(fieldErrors.password[0])
       return
     }
 
     setIsLoading(true)
 
     try {
-      await login(username, password)
+      await login(username.toLowerCase(), password)
       navigate("/chat")
     } catch (err) {
       if (isAxiosError(err)) {

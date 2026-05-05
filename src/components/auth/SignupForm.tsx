@@ -3,6 +3,7 @@ import { RegisterFormSchema } from "@/validation/rules"
 import { isAxiosError } from "axios"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import z from "zod"
 
 export default function SignupForm() {
   const [username, setUsername] = useState("")
@@ -34,12 +35,13 @@ export default function SignupForm() {
     })
 
     if (!result.success) {
-      const fields = result.error.flatten().fieldErrors
+      const { fieldErrors } = z.flattenError(result.error)
 
-      if (fields.username) setUsernameError(fields.username[0])
-      if (fields.display_name) setDisplayNameError(fields.display_name[0])
-      if (fields.password) {
-        const raw = fields.password[0]
+      if (fieldErrors.username) setUsernameError(fieldErrors.username[0])
+      if (fieldErrors.display_name)
+        setDisplayNameError(fieldErrors.display_name[0])
+      if (fieldErrors.password) {
+        const raw = fieldErrors.password[0]
         try {
           setPasswordErrors(JSON.parse(raw))
         } catch {
