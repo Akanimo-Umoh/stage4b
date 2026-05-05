@@ -142,7 +142,7 @@ label {
 }
 
 .container {
-  @apply rounded-lg bg-white p-6 shadow-lg;
+  @apply rounded-xl bg-white p-6 shadow-lg;
 }
 
 .btn-primary {
